@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core import init_gateway_client, shutdown_gateway_client, global_exception_handler
 from app.route import health_router
-from app.core import init_gateway_client, shutdown_gateway_client
 
 tags_metadata = []
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,11 +15,14 @@ async def lifespan(app: FastAPI):
     yield
     await shutdown_gateway_client(app)
 
+
 app = FastAPI(
-    tags = tags_metadata,
-    title = "Шаблон приложения для работы со шлюзом ЕВМИАС API",
+    tags=tags_metadata,
+    title="Шаблон приложения для работы со шлюзом ЕВМИАС API",
     lifespan=lifespan
 )
+
+app.add_exception_handler(Exception, global_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,  # noqa

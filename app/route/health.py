@@ -2,10 +2,10 @@
 
 from typing import Annotated
 
-import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from app.core import get_gateway_service, get_api_key, logger
+from app.core import get_gateway_service, get_api_key
+from app.model import GatewayRequest
 from app.service import GatewayService
 
 router = APIRouter(prefix="/health", tags=["Health Check"], dependencies=[Depends(get_api_key)])
@@ -18,7 +18,6 @@ router = APIRouter(prefix="/health", tags=["Health Check"], dependencies=[Depend
 )
 async def check():
     """Простая проверка работоспособности сервиса."""
-    logger.debug("{'ping': 'pong'}")
     return {"ping": "pong"}
 
 
@@ -27,12 +26,19 @@ async def check():
     summary="Проверка связи со шлюзом API",
     description="Отправляет тестовый запрос на API-шлюз для проверки связи и аутентификации."
 )
-async def check_gateway_connection(gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]):
-    payload = {
+async def check_gateway_connection(
+        gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
+):
+    payload_dict = {
         "params": {"c": "Common", "m": "getCurrentDateTime"},
         "data": {"is_activerulles": "true"}
     }
-    response = await gateway_service.make_request('post', json=payload)
+
+    validated_payload = GatewayRequest.model_validate(payload_dict)
+
+    response = await gateway_service.make_request(
+        'post',
+        json=validated_payload.model_dump()
+    )
+
     return response
-
-
