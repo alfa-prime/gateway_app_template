@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: gateway_template_app_prod
+    env_file:
+      - .env
+    ports:
+      - "8778:8000"
+    volumes:
+      - ./logs:/code/logs
+    restart: always
+

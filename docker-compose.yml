@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: . # Собирать из текущей директории
+      dockerfile: Dockerfile
+    container_name: gateway_template_app # Имя контейнера приложения
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      # Монтируем код приложения для live reload (режим read-write по умолчанию)
+      - ./app:/code/app
+      - ./logs:/code/logs
+    restart: unless-stopped
+
+networks:
+  default:
+    name: s2e_network
