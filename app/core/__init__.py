@@ -1,4 +1,5 @@
 from .config import get_settings
+from .logger_setup import logger
 from .dependencies import get_gateway_service, get_api_key
 from .client import init_gateway_client, shutdown_gateway_client
 
@@ -7,5 +8,6 @@ __all__ = [
     "init_gateway_client",
     "shutdown_gateway_client",
     "get_gateway_service",
-    "get_api_key"
+    "get_api_key",
+    "logger"
 ]
