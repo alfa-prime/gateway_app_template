@@ -66,7 +66,7 @@ DEV_PORT=8000
 PROD_PORT=8778
 ```
 
-### 4. Запуск приложения
+### 3. Запуск приложения
 
 **Для разработки (с live-reload):**
 
@@ -112,6 +112,78 @@ make up-prod
 | `make clean` | Удалить все неиспользуемые Docker-образы, контейнеры, тома и сети. |
 
 ---
+
+## GatewayService
+
+Для любого взаимодействия со шлюзом ЕВМИАС в проекте предназначен `GatewayService`.  
+Его можно легко получить в любом роутере через систему зависимостей **FastAPI**.  
+Все запросы сервис отправляет на единый эндпоинт, указанный в `.env` файле (`GATEWAY_REQUEST_ENDPOINT`).
+
+Сервис имеет один универсальный метод для выполнения запросов:
+
+```python
+make_request(method: str, **kwargs)
+```
+
+### Аргументы метода
+
+- **method**: HTTP-метод в виде строки (`'post'`, `'get'`, `'put'` и т.д.).  
+- **kwargs**: Любые именованные аргументы, которые принимает HTTP-клиент **httpx**.  
+  Самые важные из них:
+  - `json=<dict>` — для передачи тела запроса (используется в `POST`, `PUT`, `PATCH`).
+  - `params=<dict>` — для передачи query-параметров в URL (используется в `GET`).
+
+---
+
+### Пример 1: POST-запрос (самый частый случай)
+
+```python
+# В вашем файле с роутерами, например, app/route/my_new_route.py
+from fastapi import APIRouter, Depends
+from app.core import get_gateway_service
+from app.service import GatewayService
+from typing import Annotated
+
+router = APIRouter(prefix="/entities", tags=["Entities"])
+
+@router.post("/")
+async def create_entity(
+    gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
+):
+    payload = {
+        "params": {"c": "SomeClass", "m": "someMethod"},
+        "data": {"name": "New Entity", "value": 123}
+    }
+    
+    # Вызываем сервис, указывая метод 'post' и передавая данные через 'json'
+    response_data = await gateway_service.make_request('post', json=payload)
+    
+    return response_data
+```
+
+---
+
+### Пример 2: GET-запрос с параметрами
+
+```python
+# ... (импорты те же)
+
+@router.get("/")
+async def get_entities_list(
+    gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
+):
+    query_params = {
+        "entity_type": "user",
+        "status": "active"
+    }
+    
+    # Вызываем сервис с методом 'get' и передавая параметры через 'params'
+    response_data = await gateway_service.make_request('get', params=query_params)
+    
+    return response_data
+```
+
+
 
 ## Тестовый эндпоинт (/health)
 

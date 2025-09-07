@@ -27,26 +27,12 @@ async def check():
     summary="Проверка связи со шлюзом API",
     description="Отправляет тестовый запрос на API-шлюз для проверки связи и аутентификации."
 )
-async def check_gateway_connection(
-        gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
-):
+async def check_gateway_connection(gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]):
     payload = {
-        "params": {
-            "c": "Common",
-            "m": "getCurrentDateTime"
-        },
-        "data": {
-            "is_activerulles": "true"
-        }
+        "params": {"c": "Common", "m": "getCurrentDateTime"},
+        "data": {"is_activerulles": "true"}
     }
-
-    try:
-        response = await gateway_service.make_request(payload)
-        return response
+    response = await gateway_service.make_request('post', json=payload)
+    return response
 
 
-    except httpx.RequestError as exc:
-        raise HTTPException(status_code=503, detail=f"Не удалось подключиться к шлюзу: {exc}")
-
-    except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=exc.response.status_code, detail=f"Ошибка от шлюза: {exc.response.text}")
