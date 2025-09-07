@@ -13,7 +13,3 @@ services:
       - ./app:/code/app
       - ./logs:/code/logs
     restart: unless-stopped
-
-networks:
-  default:
-    name: s2e_network
