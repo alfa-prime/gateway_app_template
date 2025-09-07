@@ -32,7 +32,7 @@ git clone ssh://git@gitverse.ru:2222/imperium/gateway_app_template.git my_super_
 
 ### 2. Настройка конфигурации
 
-Скопируйте файл с примером переменных окружения и укажите ваш ключ доступа к шлюзу.
+Скопируйте файл с примером переменных окружения.
 
 ```bash
 # Перейдите в папку проекта
@@ -42,38 +42,26 @@ cd my_super_app
 cp .env.example .env
 ```
 
-Откройте файл `.env` и замените `super-puper-secret-gateway-key` на ваш реальный `GATEWAY_API_KEY`.
+**Откройте файл `.env` и настройте его под ваш проект:**
+`GATEWAY_API_KEY`: Укажите ваш ключ доступа к шлюзу.
+`DEV_CONTAINER_NAME` и `PROD_CONTAINER_NAME`: Задайте уникальные имена для контейнеров (по умолчанию gateway_app_template).
+`DEV_PORT` и `PROD_PORT`: При необходимости измените порты, по которым приложение будет доступно.
+
 
 ```dotenv
 # .env
 GATEWAY_URL=http://192.168.0.249:8777/
 GATEWAY_API_KEY=ваш-реальный-ключ-доступа
 GATEWAY_REQUEST_ENDPOINT=gateway/request
+
+# Имена контейнеров
+DEV_CONTAINER_NAME=my_super_app
+PROD_CONTAINER_NAME=my_super_app_prod
+
+# Порты для доступа с хост-машины
+DEV_PORT=8000
+PROD_PORT=8778
 ```
-
----
-
-### 3. Настройка имен контейнеров
-
-Чтобы избежать конфликтов и сделать управление контейнерами удобнее, необходимо задать уникальные имена для вашего приложения. Рекомендуется использовать одно и то же базовое имя.  
-
-Пример: `my_super_app`
-
-Вам нужно заменить стандартное имя `gateway_template_app` на ваше `my_super_app` в следующих файлах:
-
-- **docker-compose.yml**:  
-  `container_name: gateway_template_app → container_name: my_super_app`
-
-- **docker-compose.prod.yml**:  
-  `container_name: gateway_template_app_prod → container_name: my_super_app_prod`
-
-- **makefile**:  
-  В секции Development: `gateway_template_app → my_super_app`  
-  В секции Production: `gateway_template_app_prod → my_super_app_prod`  
-
-> ⚠️ Почему это важно? Команды в makefile (например, `make bash`) обращаются к контейнеру по его имени. Если имена не совпадут, команды не будут работать.
-
----
 
 ### 4. Запуск приложения
 

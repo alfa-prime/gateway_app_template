@@ -1,5 +1,10 @@
 # Makefile for managing Docker-based FastAPI app
 
+# connect .env file
+include .env
+export
+
+
 # --- Development ---
 up:
 	docker compose up --build
@@ -8,7 +13,7 @@ down:
 	docker compose down
 
 bash:
-	docker exec -it gateway_template_app bash
+	docker exec -it ${DEV_CONTAINER_NAME} bash
 
 # --- Production ---
 up-prod:
@@ -21,7 +26,7 @@ logs-prod:
 	docker compose -f docker-compose.prod.yml logs -f app
 
 bash-prod:
-	docker exec -it gateway_template_app_prod bash
+	docker exec -it ${PROD_CONTAINER_NAME} bash
 
 
 # --- Common ---
