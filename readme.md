@@ -43,8 +43,11 @@ cp .env.example .env
 ```
 
 **Откройте файл `.env` и настройте его под ваш проект:**
+
 `GATEWAY_API_KEY`: Укажите ваш ключ доступа к шлюзу.
-`DEV_CONTAINER_NAME` и `PROD_CONTAINER_NAME`: Задайте уникальные имена для контейнеров (по умолчанию gateway_app_template).
+
+`DEV_CONTAINER_NAME` и `PROD_CONTAINER_NAME`: Задайте уникальные имена для контейнеров.
+
 `DEV_PORT` и `PROD_PORT`: При необходимости измените порты, по которым приложение будет доступно.
 
 
