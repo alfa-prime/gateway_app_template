@@ -135,28 +135,36 @@ make_request(method: str, **kwargs)
 
 ---
 
-### Пример 1: POST-запрос (самый частый случай)
+### Пример 1: POST-запрос с валидацией (основной сценарий)
 
 ```python
-# В вашем файле с роутерами, например, app/route/my_new_route.py
+## В вашем файле с роутерами, например, app/route/tasks.py
 from fastapi import APIRouter, Depends
 from app.core import get_gateway_service
 from app.service import GatewayService
+from app.model import GatewayRequest 
 from typing import Annotated
 
-router = APIRouter(prefix="/entities", tags=["Entities"])
+router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
-@router.post("/")
-async def create_entity(
+@router.post("/process-completed")
+async def process_completed_tasks(
     gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
 ):
-    payload = {
-        "params": {"c": "SomeClass", "m": "someMethod"},
-        "data": {"name": "New Entity", "value": 123}
+    # 1. Ваша внутренняя логика формирует данные
+    payload_dict = {
+        "params": {"c": "Tasks", "m": "archiveCompleted"},
+        "data": {"archive_older_than_days": 30}
     }
     
-    # Вызываем сервис, указывая метод 'post' и передавая данные через 'json'
-    response_data = await gateway_service.make_request('post', json=payload)
+    # 2. Данные валидируются через модель перед отправкой
+    validated_payload = GatewayRequest.model_validate(payload_dict)
+    
+    # 3. Отправляем валидированные данные
+    response_data = await gateway_service.make_request(
+        'post', 
+        json=validated_payload.model_dump()
+    )
     
     return response_data
 ```
@@ -168,16 +176,19 @@ async def create_entity(
 ```python
 # ... (импорты те же)
 
-@router.get("/")
-async def get_entities_list(
+@router.get("/find-by-status")
+async def find_tasks_by_status(
     gateway_service: Annotated[GatewayService, Depends(get_gateway_service)]
 ):
+    # Просто формируем словарь с параметрами для URL
     query_params = {
-        "entity_type": "user",
-        "status": "active"
+        "c": "Tasks", 
+        "m": "findByStatus",
+        "status": "active",
+        "limit": 100
     }
     
-    # Вызываем сервис с методом 'get' и передавая параметры через 'params'
+    # Вызываем сервис с методом 'get' и передаем параметры через 'params'
     response_data = await gateway_service.make_request('get', params=query_params)
     
     return response_data
