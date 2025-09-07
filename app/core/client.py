@@ -2,7 +2,7 @@ import httpx
 from fastapi import FastAPI
 
 from .config import get_settings
-
+from app.core import logger
 
 async def init_gateway_client(app: FastAPI):
     """
@@ -16,7 +16,7 @@ async def init_gateway_client(app: FastAPI):
         timeout=30.0
     )
     app.state.gateway_client = gateway_client
-    print(f"Gateway client initialized for base_url: {settings.GATEWAY_URL}")
+    logger.info(f"Gateway client initialized for base_url: {settings.GATEWAY_URL}")
 
 
 async def shutdown_gateway_client(app: FastAPI):
@@ -26,4 +26,4 @@ async def shutdown_gateway_client(app: FastAPI):
     """
     if hasattr(app.state, 'gateway_client'):
         await app.state.gateway_client.aclose()
-        print("Gateway client closed.")
+        logger.info("Gateway client closed.")
